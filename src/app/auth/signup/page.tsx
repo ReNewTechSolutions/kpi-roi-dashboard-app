@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/lib/supabase.client";
 import { useRouter } from "next/navigation";
 import Card from "@/components/Card";
 
@@ -17,7 +17,7 @@ export default function SignupPage() {
     const { error } = await supabase.auth.signUp({
       email,
       password,
-      options: { data: { company } },
+      options: { data: { company } }, // matches your DB trigger if you keep it
     });
     if (error) return setErr(error.message);
     r.push("/dashboard");
