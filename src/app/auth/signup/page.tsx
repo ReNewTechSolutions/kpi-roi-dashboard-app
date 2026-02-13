@@ -1,39 +1,61 @@
 "use client";
 
-import { useState } from "react";
-import { supabase } from "@/lib/supabase.client";
-import { useRouter } from "next/navigation";
+import { useMemo, useState } from "react";
 import Card from "@/components/Card";
+import { getSupabaseBrowserClient } from "@/lib/supabase";
+import { useRouter } from "next/navigation";
+
+export const dynamic = "force-dynamic";
 
 export default function SignupPage() {
   const r = useRouter();
-  const [company, setCompany] = useState("");
+  const supabase = useMemo(() => getSupabaseBrowserClient(), []);
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [err, setErr] = useState<string | null>(null);
+  const [status, setStatus] = useState<string | null>(null);
 
-  const signup = async () => {
-    setErr(null);
+  const signUp = async () => {
+    setStatus(null);
+
     const { error } = await supabase.auth.signUp({
-      email,
+      email: email.trim(),
       password,
-      options: { data: { company } }, // matches your DB trigger if you keep it
     });
-    if (error) return setErr(error.message);
-    r.push("/dashboard");
+
+    if (error) return setStatus(error.message);
+
+    // Depending on Supabase email-confirm settings, user may need to confirm email.
+    setStatus("Account created. You can log in now.");
+    r.push("/auth/login");
   };
 
   return (
-    <main style={{ display: "grid", gap: 12 }}>
+    <main style={{ display: "grid", gap: 12, maxWidth: 480 }}>
+      <h2 style={{ margin: 0 }}>Create account</h2>
+
       <Card>
-        <h2 style={{ marginTop: 0 }}>Create account</h2>
-        {err ? <div style={{ color: "crimson" }}>{err}</div> : null}
         <div style={{ display: "grid", gap: 10 }}>
-          <input placeholder="Company / Org name" value={company} onChange={(e) => setCompany(e.target.value)} style={inp} />
-          <input placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} style={inp} />
-          <input placeholder="Password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} style={inp} />
-          <button onClick={signup} style={btn}>Sign up</button>
-          <a href="/login" style={{ fontSize: 13 }}>Back to login</a>
+          <input
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            style={inp}
+          />
+          <input
+            placeholder="Password"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            style={inp}
+          />
+
+          <button onClick={signUp} style={btn}>Sign up</button>
+          {status ? <div style={{ fontSize: 13, opacity: 0.85 }}>{status}</div> : null}
+
+          <div style={{ fontSize: 13, opacity: 0.75 }}>
+            Have an account? <a href="/auth/login">Sign in</a>
+          </div>
         </div>
       </Card>
     </main>

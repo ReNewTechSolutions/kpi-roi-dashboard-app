@@ -1,9 +1,7 @@
-import { supabase } from "./supabase.client";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
-export async function getSession() {
-  return supabase.auth.getSession();
-}
-
-export async function signOut() {
-  return supabase.auth.signOut();
+export async function requireSession(supabase: SupabaseClient) {
+  const { data, error } = await supabase.auth.getSession();
+  if (error) throw error;
+  return data.session;
 }

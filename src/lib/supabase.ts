@@ -2,13 +2,10 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
 let _client: SupabaseClient | null = null;
 
-/**
- * Client-side Supabase instance.
- * Safe for App Router because it will only initialize in the browser.
- */
 export function getSupabaseBrowserClient(): SupabaseClient {
+  // Never initialize during SSR/prerender/build
   if (typeof window === "undefined") {
-    throw new Error("Supabase browser client cannot be created on the server.");
+    throw new Error("getSupabaseBrowserClient must be called in the browser.");
   }
 
   if (_client) return _client;
@@ -22,14 +19,3 @@ export function getSupabaseBrowserClient(): SupabaseClient {
   _client = createClient(supabaseUrl, supabaseAnonKey);
   return _client;
 }
-
-/**
- * Convenience export for files that previously did:
- *   import { supabase } from "@/lib/supabase"
- *
- * IMPORTANT: only use this inside Client Components and inside effects/handlers.
- */
-export const supabase = (() => {
-  if (typeof window === "undefined") return null as unknown as SupabaseClient;
-  return getSupabaseBrowserClient();
-})();
