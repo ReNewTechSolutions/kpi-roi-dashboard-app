@@ -1,17 +1,19 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import Card from "@/components/Card";
 import NumberField from "@/components/NumberField";
 import { getSupabaseBrowserClient } from "@/lib/supabase";
 import { getCachedOrgId } from "@/lib/storage";
 import { useRouter } from "next/navigation";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 export const dynamic = "force-dynamic";
 
 export default function MetricsPage() {
   const r = useRouter();
-  const supabase = useMemo(() => getSupabaseBrowserClient(), []);
+
+  const [supabase, setSupabase] = useState<SupabaseClient | null>(null);
 
   const [month, setMonth] = useState("2026-02-01");
   const [revenue, setRevenue] = useState(20000);
@@ -21,18 +23,19 @@ export default function MetricsPage() {
   const [orgId, setOrgId] = useState<string | null>(null);
 
   useEffect(() => {
+    const sb = getSupabaseBrowserClient();
+    setSupabase(sb);
+
     (async () => {
-      const { data: sess } = await supabase.auth.getSession();
-      if (!sess.session) {
-        r.push("/auth/login"); // ✅ correct route
-        return;
-      }
+      const { data: sess } = await sb.auth.getSession();
+      if (!sess.session) r.push("/auth/login");
       setOrgId(getCachedOrgId());
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [supabase]);
+  }, []);
 
   const save = async () => {
+    if (!supabase) return; // not ready yet
     setStatus(null);
 
     const { data: sess } = await supabase.auth.getSession();
@@ -40,8 +43,14 @@ export default function MetricsPage() {
     if (!userId) return setStatus("Not signed in.");
 
     let useOrgId = orgId;
+
     if (!useOrgId) {
-      const { data: orgs, error: orgErr } = await supabase.from("organizations").select("id").limit(1);
+      const { data: orgs, error: orgErr } = await supabase
+        .from("organizations")
+        .select("id")
+        .order("created_at", { ascending: false })
+        .limit(1);
+
       if (orgErr || !orgs?.[0]?.id) return setStatus("No org selected. Go to Organizations.");
       useOrgId = orgs[0].id;
     }
@@ -77,7 +86,10 @@ export default function MetricsPage() {
             <textarea value={notes} onChange={(e) => setNotes(e.target.value)} style={{ ...inp, height: 90 }} />
           </label>
 
-          <button onClick={save} style={btn}>Save</button>
+          <button onClick={save} style={btn} disabled={!supabase}>
+            Save
+          </button>
+
           {status ? <div style={{ fontSize: 13, opacity: 0.85 }}>{status}</div> : null}
         </div>
       </Card>

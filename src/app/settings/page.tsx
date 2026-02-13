@@ -1,62 +1,101 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import Card from "@/components/Card";
+import NumberField from "@/components/NumberField";
 import { getSupabaseBrowserClient } from "@/lib/supabase";
-import { clearCachedOrgId, getDemoMode, setDemoMode } from "@/lib/storage";
+import { getCachedOrgId } from "@/lib/storage";
 import { useRouter } from "next/navigation";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
-export default function SettingsPage() {
+export const dynamic = "force-dynamic";
+
+export default function MetricsPage() {
   const r = useRouter();
-  const supabase = useMemo(() => getSupabaseBrowserClient(), []); // ✅ add this
 
-  const [demo, setDemo] = useState(false);
-  const [email, setEmail] = useState<string | null>(null);
+  const [supabase, setSupabase] = useState<SupabaseClient | null>(null);
+
+  const [month, setMonth] = useState("2026-02-01");
+  const [revenue, setRevenue] = useState(20000);
+  const [cost, setCost] = useState(11000);
+  const [notes, setNotes] = useState("");
+  const [status, setStatus] = useState<string | null>(null);
+  const [orgId, setOrgId] = useState<string | null>(null);
 
   useEffect(() => {
+    const sb = getSupabaseBrowserClient();
+    setSupabase(sb);
+
     (async () => {
-      const { data: sess } = await supabase.auth.getSession();
-      if (!sess.session) return r.push("/auth/login");
-      setEmail(sess.session.user.email ?? null);
-      setDemo(getDemoMode());
+      const { data: sess } = await sb.auth.getSession();
+      if (!sess.session) r.push("/auth/login");
+      setOrgId(getCachedOrgId());
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const toggle = (v: boolean) => {
-    setDemo(v);
-    setDemoMode(v);
-  };
+  const save = async () => {
+    if (!supabase) return; // not ready yet
+    setStatus(null);
 
-  const signOut = async () => {
-    clearCachedOrgId();
-    await supabase.auth.signOut();
-    r.push("/auth/login");
+    const { data: sess } = await supabase.auth.getSession();
+    const userId = sess.session?.user.id;
+    if (!userId) return setStatus("Not signed in.");
+
+    let useOrgId = orgId;
+
+    if (!useOrgId) {
+      const { data: orgs, error: orgErr } = await supabase
+        .from("organizations")
+        .select("id")
+        .order("created_at", { ascending: false })
+        .limit(1);
+
+      if (orgErr || !orgs?.[0]?.id) return setStatus("No org selected. Go to Organizations.");
+      useOrgId = orgs[0].id;
+    }
+
+    const { error } = await supabase.from("kpi_entries").upsert({
+      org_id: useOrgId,
+      month,
+      revenue,
+      cost,
+      notes,
+      created_by: userId,
+    });
+
+    setStatus(error ? error.message : "Saved!");
   };
 
   return (
     <main style={{ display: "grid", gap: 12 }}>
-      <h2 style={{ margin: 0 }}>Settings</h2>
+      <h2 style={{ margin: 0 }}>Metrics Entry</h2>
 
       <Card>
-        <div>Signed in as: <b>{email ?? "—"}</b></div>
-      </Card>
+        <div style={{ display: "grid", gap: 12 }}>
+          <label style={{ display: "grid", gap: 6 }}>
+            <span style={{ fontSize: 14, opacity: 0.85 }}>Month (YYYY-MM-01)</span>
+            <input value={month} onChange={(e) => setMonth(e.target.value)} style={inp} />
+          </label>
 
-      <Card>
-        <div style={{ fontWeight: 800 }}>Demo Mode</div>
-        <div style={{ opacity: 0.75, marginTop: 6 }}>
-          When ON, dashboard uses built-in sample data (great for screenshots + first-run).
+          <NumberField label="Revenue" prefix="$" value={revenue} onChange={setRevenue} />
+          <NumberField label="Cost" prefix="$" value={cost} onChange={setCost} />
+
+          <label style={{ display: "grid", gap: 6 }}>
+            <span style={{ fontSize: 14, opacity: 0.85 }}>Notes</span>
+            <textarea value={notes} onChange={(e) => setNotes(e.target.value)} style={{ ...inp, height: 90 }} />
+          </label>
+
+          <button onClick={save} style={btn} disabled={!supabase}>
+            Save
+          </button>
+
+          {status ? <div style={{ fontSize: 13, opacity: 0.85 }}>{status}</div> : null}
         </div>
-
-        <div style={{ display: "flex", gap: 10, alignItems: "center", marginTop: 10 }}>
-          <input type="checkbox" checked={demo} onChange={(e) => toggle(e.target.checked)} />
-          <div>{demo ? "ON" : "OFF"}</div>
-        </div>
       </Card>
-
-      <button onClick={signOut} style={btn}>Sign out</button>
     </main>
   );
 }
 
+const inp: React.CSSProperties = { padding: 12, borderRadius: 10, border: "1px solid #ddd" };
 const btn: React.CSSProperties = { padding: 12, borderRadius: 10, border: "1px solid #ddd", cursor: "pointer" };
