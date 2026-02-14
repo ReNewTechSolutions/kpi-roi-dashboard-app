@@ -1,23 +1,20 @@
-// =========================================================
-// File: src/lib/supabase/client.ts
-// =========================================================
+"use client";
+
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
-let browserClient: SupabaseClient | null = null;
-
-function requiredEnv(name: string): string {
-  const v = process.env[name];
-  if (!v) throw new Error(`Missing env var: ${name}`);
-  return v;
-}
+let _client: SupabaseClient | null = null;
 
 export function getSupabaseBrowserClient(): SupabaseClient {
-  if (browserClient) return browserClient;
+  if (_client) return _client;
 
-  const url = requiredEnv("NEXT_PUBLIC_SUPABASE_URL");
-  const anonKey = requiredEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY");
+  // IMPORTANT: static property access so Next can inline values into the client bundle
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-  browserClient = createClient(url, anonKey, {
+  if (!url) throw new Error("Missing env var: NEXT_PUBLIC_SUPABASE_URL");
+  if (!anonKey) throw new Error("Missing env var: NEXT_PUBLIC_SUPABASE_ANON_KEY");
+
+  _client = createClient(url, anonKey, {
     auth: {
       persistSession: true,
       autoRefreshToken: true,
@@ -25,5 +22,5 @@ export function getSupabaseBrowserClient(): SupabaseClient {
     },
   });
 
-  return browserClient;
+  return _client;
 }
