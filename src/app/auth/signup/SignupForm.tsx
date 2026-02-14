@@ -41,10 +41,13 @@
        setBusy(true);
    
        try {
-         const supabase = await getSupabaseBrowserClient();
+         const supabase = getSupabaseBrowserClient();
          const { error } = await supabase.auth.signUp({
-           email: email.trim(),
-           password,
+          email,
+          password,
+          options: {
+            emailRedirectTo: `${window.location.origin}/auth/callback`,
+          },
          });
    
          if (error) {
