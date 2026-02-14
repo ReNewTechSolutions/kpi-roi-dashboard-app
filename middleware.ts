@@ -1,13 +1,20 @@
 // middleware.ts
-import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 
 export function middleware(req: NextRequest) {
+  // If you only want to protect /(protected) routes, do it by matcher (below)
   return NextResponse.next();
 }
 
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|manifest.webmanifest|favicon/|icon|apple-icon).*)",
+    // Only protect routes under /(protected)
+    "/dashboard/:path*",
+    "/metrics/:path*",
+    "/org/:path*",
+    "/roi/:path*",
+    "/settings/:path*",
+    "/legal/:path*",
   ],
 };
