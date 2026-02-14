@@ -57,7 +57,7 @@ export default async function ProtectedPrivacyPage() {
 
   if (!user) {
     return (
-      <main style={{ maxWidth: 920, margin: "0 auto", padding: "40px 16px" }}>
+      <main style={{ width: "100%", display: "grid", gap: 12 }}>
         <h1 style={{ margin: 0 }}>Privacy</h1>
         <p style={{ opacity: 0.75 }}>You must be signed in to view the org-scoped legal page.</p>
         <Link href="/privacy">View public privacy page</Link>
@@ -69,7 +69,7 @@ export default async function ProtectedPrivacyPage() {
   const orgName = orgId ? await resolveOrgName(orgId) : null;
 
   return (
-    <main style={{ maxWidth: 920, margin: "0 auto", padding: "40px 16px", display: "grid", gap: 12 }}>
+    <main style={{ width: "100%", display: "grid", gap: 12 }}>
       <div style={{ display: "flex", gap: 10, alignItems: "baseline" }}>
         <h1 style={{ margin: 0 }}>Privacy</h1>
         <span style={{ marginLeft: "auto", fontSize: 12, opacity: 0.7 }}>
