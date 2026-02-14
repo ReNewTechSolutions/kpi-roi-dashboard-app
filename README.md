@@ -1,100 +1,38 @@
-# KPI + ROI Dashboard
+<!-- ======================================================
+File: README.md
+====================================================== -->
 
-A production-ready, multi-organization KPI and ROI Dashboard built with:
+# KPI + ROI Dashboard (Multi-Tenant SaaS Starter)
 
-• Next.js (App Router)
-• React
-• Supabase (Postgres + Auth)
-• Vercel Deployment
-
-This project is designed as a commercial-ready SaaS starter asset.
+A production-ready **KPI + ROI** dashboard starter built with **Next.js App Router + Supabase**.  
+Designed to be deployed quickly and sold as a code asset or launched as SaaS.
 
 ---
 
-# Features
+## Highlights
 
-• Secure Supabase Authentication
-• Multi-Organization Support
-• KPI Tracking (Revenue / Cost / Profit)
-• ROI Calculator
-• Month-over-Month Growth Metrics
-• Demo Mode
-• Production-Ready Environment Setup
-• Vercel One-Click Deployment
-
----
-
-# Tech Stack
-
-Frontend:
-Next.js 16
-React
-TypeScript
-
-Backend:
-Supabase (Postgres + RLS)
-Supabase Auth
-
-Hosting:
-Vercel
+- ✅ Multi-tenant org model (organizations + membership)
+- ✅ KPI tracking (monthly revenue/cost + notes)
+- ✅ ROI model storage (JSON inputs)
+- ✅ Supabase Auth (signup/login)
+- ✅ RLS policies included (secure-by-default)
+- ✅ Vercel deployment ready
+- ✅ Clean modular structure (UI / data / business logic)
+- ✅ Demo-mode friendly for screenshots & onboarding *(optional)*
 
 ---
 
-# Project Structure
+## Tech Stack
 
-src/
-  app/
-  components/
-  lib/
-
----
-
-# Environment Variables
-
-Create a .env.local file:
-
-NEXT_PUBLIC_SUPABASE_URL=
-NEXT_PUBLIC_SUPABASE_ANON_KEY=
+- Next.js 16 (App Router)
+- Supabase (Auth + Postgres)
+- TypeScript
+- Vercel deployment
 
 ---
 
-# Local Development
+## Quick Start
 
+1) Install dependencies:
+```bash
 npm install
-npm run dev
-
-Visit:
-http://localhost:3000
-
----
-
-# Production Deployment
-
-Deploy directly to Vercel:
-
-1. Import GitHub repository
-2. Add environment variables
-3. Deploy
-
----
-
-# License
-
-This project is sold as a full intellectual property transfer asset.
-
-See LICENSE file for full details.
-
----
-
-# Commercial Use
-
-Upon transfer of ownership, the buyer may:
-
-• Rebrand
-• Modify
-• Monetize
-• Resell the business built on top of this software
-
----
-
-Built by ReNewTech Solutions LLC

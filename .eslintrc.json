@@ -1,0 +1,18 @@
+{
+    "root": true,
+    "extends": ["next/core-web-vitals"],
+    "rules": {
+      "no-restricted-imports": [
+        "error",
+        {
+          "paths": [
+            {
+              "name": "next/headers",
+              "importNames": ["cookies", "headers"],
+              "message": "Use getCookieStore()/getHeaderStore() from '@/lib/nextRequest' (Next 16 may require await)."
+            }
+          ]
+        }
+      ]
+    }
+  }

@@ -1,158 +1,84 @@
-# KPI + ROI Dashboard  
-## Buyer Setup Guide
+<!-- ======================================================
+File: SETUP_GUIDE.md
+Rewritten (clean structure + fixed code fences + billing + webhook troubleshooting)
+====================================================== -->
 
-Thank you for purchasing the KPI + ROI Dashboard asset.
+# Setup Guide — KPI + ROI Dashboard (Next.js + Supabase + Vercel)
 
-This guide will walk you through deploying the application in under 10 minutes.
-
----
-
-# 1. Prerequisites
-
-You will need:
-
-• A Supabase account (https://supabase.com)  
-• A Vercel account (https://vercel.com)  
-• A GitHub account  
+Deploy locally and to Vercel fast. This repo supports **one-click Supabase installs** (core-only or core+billing).
 
 ---
 
-# 2. Supabase Setup
+## 1) Prerequisites
 
-## Step 1: Create a New Project
-
-1. Log into Supabase.
-2. Click "New Project".
-3. Choose a name and region.
-4. Wait for database provisioning.
+- Node.js 18+ (recommended 20+)
+- A Supabase project
+- A Vercel account
 
 ---
 
-## Step 2: Get API Credentials
+## 2) Create a Supabase Project
 
-In Supabase:
-
-Settings → API
-
-Copy:
-
-• Project URL  
-• anon public key  
-
-You will use these in Vercel.
+1. Create a new project in Supabase.
+2. Go to **Project Settings → API** and copy:
+   - `Project URL` → `NEXT_PUBLIC_SUPABASE_URL`
+   - `anon public` key → `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 
 ---
 
-## Step 3: Run Database Schema
+## 3) Install Database (One-Click)
 
-Inside Supabase:
+In Supabase, open **SQL Editor** and run **one** of these:
 
-SQL Editor → New Query
+### Option A — Core App Only (no Stripe billing)
+Run:
+- `supabase/install_minimal.sql`
 
-Paste the contents of:
+### Option B — Core + Stripe Billing + Entitlements
+Run:
+- `supabase/install_billing.sql`
 
-`/supabase/schema.sql`
+> If you already installed using older `schema.sql` + `rls.sql`, you can keep those — the one-click installs are for new buyers / fresh Supabase projects.
 
-Run the query.
-
-Then paste and run:
-
-`/supabase/rls.sql`
-
-This sets up:
-
-• organizations table  
-• org_members table  
-• kpi_entries table  
-• Row Level Security  
-• Policies  
-
----
-
-# 3. Deploy on Vercel
-
-## Step 1: Import Repository
-
-1. Log into Vercel.
-2. Click "Add New Project".
-3. Import this GitHub repository.
-4. Set Root Directory (if needed) to:
-
-kpi-roi-dashboard-web
+### What the install does
+- Creates multi-tenant tables (orgs, members, KPI, ROI)
+- Enables RLS + policies (member/owner rules)
+- Adds `updated_at` triggers
+- Adds an auth trigger that auto-creates:
+  - an organization
+  - org membership (owner)
+  - a default ROI model
+  - (billing install only) default **free** entitlements
 
 ---
 
-## Step 2: Add Environment Variables
+## 4) Configure Auth Settings (Supabase)
 
-In Vercel → Project → Settings → Environment Variables
+Go to **Authentication → URL Configuration**:
 
-Add:
+### Local
+- Site URL: `http://localhost:3000`
+- Redirect URLs:
+  - `http://localhost:3000/**`
 
-NEXT_PUBLIC_SUPABASE_URL  
-Value: https://YOUR_PROJECT_ID.supabase.co
+### Production (Vercel)
+- Add your Vercel domain:
+  - `https://YOUR_VERCEL_DOMAIN/**`
 
-NEXT_PUBLIC_SUPABASE_ANON_KEY  
-Value: (Your Supabase anon key)
-
-Add these to:
-• Production  
-• Preview  
-• Development  
-
----
-
-## Step 3: Deploy
-
-Click "Deploy".
-
-Vercel will build and launch the app automatically.
+### Email confirmation (optional)
+Disable email confirmations for quicker testing:
+- **Auth → Providers → Email → Confirm email** (toggle)
 
 ---
 
-# 4. First Login
+## 5) Configure Environment Variables
 
-1. Open the deployed URL.
-2. Create an account via Signup.
-3. You will be redirected to the Dashboard.
+Create `.env.local` at repo root:
 
----
+```bash
+NEXT_PUBLIC_SUPABASE_URL="https://xxxxxxxx.supabase.co"
+NEXT_PUBLIC_SUPABASE_ANON_KEY="xxxxxxxxxxxxxxxxxxxx"
 
-# 5. Demo Mode
-
-Demo mode is available in Settings.
-
-When enabled:
-• Dashboard loads pre-seeded KPI data
-• No database interaction required
-
-This is useful for:
-• Product demos
-• Sales screenshots
-• Marketing previews
-
----
-
-# 6. Customization
-
-You may:
-
-• Rebrand the application
-• Change styling
-• Modify KPI logic
-• Extend ROI formulas
-• Add Stripe for monetization
-• Add multi-tenant billing
-
-Full source ownership transfers with purchase.
-
----
-
-# 7. Production Notes
-
-• Supabase free tier supports early usage.
-• Vercel Hobby plan is sufficient for low traffic.
-• Upgrade plans as needed for scaling.
-
----
-
-For technical questions regarding transfer, contact the seller.
+# Optional flags
+NEXT_PUBLIC_DEMO_MODE="false"
+NEXT_PUBLIC_APP_NAME="KPI + ROI Dashboard"

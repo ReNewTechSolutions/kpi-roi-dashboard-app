@@ -1,29 +1,58 @@
-const KEYS = {
-    DEMO_MODE: "kpi_roi_demo_mode",
-    ORG_ID: "kpi_roi_org_id",
-  };
+/* =========================================================
+   File: src/lib/storage.ts
+   Browser-only helpers for demo mode + org selection
+   ========================================================= */
+   export const STORAGE_KEYS = {
+    orgId: "metricroi.currentOrgId",
+    demoMode: "metricroi.demoMode",
+  } as const;
   
-  export function getDemoMode(): boolean {
-    if (typeof window === "undefined") return false;
-    return window.localStorage.getItem(KEYS.DEMO_MODE) === "true";
+  function safeGet(key: string): string | null {
+    if (typeof window === "undefined") return null;
+    try {
+      return window.localStorage.getItem(key);
+    } catch {
+      return null;
+    }
   }
   
-  export function setDemoMode(v: boolean) {
+  function safeSet(key: string, value: string): void {
     if (typeof window === "undefined") return;
-    window.localStorage.setItem(KEYS.DEMO_MODE, v ? "true" : "false");
+    try {
+      window.localStorage.setItem(key, value);
+    } catch {
+      // ignore
+    }
+  }
+  
+  function safeRemove(key: string): void {
+    if (typeof window === "undefined") return;
+    try {
+      window.localStorage.removeItem(key);
+    } catch {
+      // ignore
+    }
   }
   
   export function getCachedOrgId(): string | null {
-    if (typeof window === "undefined") return null;
-    return window.localStorage.getItem(KEYS.ORG_ID);
+    const v = safeGet(STORAGE_KEYS.orgId);
+    return v && v.trim() ? v : null;
   }
   
-  export function setCachedOrgId(orgId: string) {
-    if (typeof window === "undefined") return;
-    window.localStorage.setItem(KEYS.ORG_ID, orgId);
+  export function setCachedOrgId(orgId: string): void {
+    safeSet(STORAGE_KEYS.orgId, orgId);
   }
   
-  export function clearCachedOrgId() {
-    if (typeof window === "undefined") return;
-    window.localStorage.removeItem(KEYS.ORG_ID);
+  export function clearCachedOrgId(): void {
+    safeRemove(STORAGE_KEYS.orgId);
+  }
+  
+  export function getDemoMode(): boolean {
+    const v = safeGet(STORAGE_KEYS.demoMode);
+    if (!v) return false;
+    return v === "1" || v.toLowerCase() === "true";
+  }
+  
+  export function setDemoMode(enabled: boolean): void {
+    safeSet(STORAGE_KEYS.demoMode, enabled ? "1" : "0");
   }

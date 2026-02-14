@@ -1,49 +1,25 @@
-KPI + ROI Dashboard
-Copyright (c) 2026 ReNewTech Solutions LLC
+# =========================================================
+# File: LICENSE
+# =========================================================
 
-FULL INTELLECTUAL PROPERTY TRANSFER LICENSE
+MIT License
 
-Upon completion of a verified sale of this Software through Flippa
-or a direct asset purchase agreement, all rights, title, and interest
-in the Software are transferred to the buyer.
+Copyright (c) 2026 ReNewTechSolutions
 
-1. Transfer of Ownership
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
-The buyer receives full ownership of:
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
 
-• All source code
-• All design assets
-• All documentation
-• All related intellectual property rights
-• All commercial usage rights
-
-The buyer may modify, rebrand, sublicense, distribute,
-or sell the Software without restriction.
-
-2. Seller Warranty
-
-The seller warrants that:
-
-• The Software is original work.
-• The seller has full authority to transfer ownership.
-• The Software does not knowingly infringe third-party rights.
-
-3. Limitation of Liability
-
-The Software is provided “as is” at time of transfer.
-The seller is not liable for future modifications, business outcomes,
-or operational issues following the transfer of ownership.
-
-4. Third-Party Dependencies
-
-This Software uses third-party services including but not limited to:
-• Next.js
-• React
-• Supabase
-• Vercel
-
-These services are governed by their own licenses and terms of service.
-The buyer assumes responsibility for continued compliance with those terms.
-
-Upon completion of sale, ReNewTech Solutions LLC retains no ownership
-interest in the Software unless otherwise agreed in writing.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.

@@ -1,16 +1,34 @@
+/* =========================================================
+   File: src/app/auth/login/LoginForm.tsx
+   Update: honor ?next=... and prevent open-redirects.
+   ========================================================= */
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import Card from "@/components/Card";
+import { useRouter, useSearchParams } from "next/navigation";
 import { getSupabaseBrowserClient } from "@/lib/supabase";
+import {
+  AuthButton,
+  AuthCard,
+  AuthInput,
+  AuthStatus,
+} from "@/components/auth/AuthUI";
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
+function sanitizeNext(nextValue: string | null, fallback: string) {
+  if (!nextValue) return fallback;
+  if (!nextValue.startsWith("/")) return fallback;
+  if (nextValue.startsWith("//")) return fallback;
+  return nextValue;
+}
 
-export default function LoginPage() {
-  const r = useRouter();
+export default function LoginForm() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const nextTarget = useMemo(() => {
+    return sanitizeNext(searchParams.get("next"), "/dashboard");
+  }, [searchParams]);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -18,26 +36,31 @@ export default function LoginPage() {
   const [status, setStatus] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
-  // Optional: if already signed in, jump to dashboard
   useEffect(() => {
+    let alive = true;
+
     (async () => {
       try {
-        const supabase = getSupabaseBrowserClient();
+        const supabase = await getSupabaseBrowserClient();
         const { data } = await supabase.auth.getSession();
-        if (data.session) r.replace("/dashboard");
+        if (!alive) return;
+        if (data.session) router.replace(nextTarget);
       } catch {
-        // ignore (build/SSR safety or env)
+        // ignore
       }
     })();
-  }, [r]);
 
-  const signIn = async () => {
+    return () => {
+      alive = false;
+    };
+  }, [router, nextTarget]);
+
+  async function signIn() {
     setStatus(null);
     setBusy(true);
 
     try {
-      const supabase = getSupabaseBrowserClient(); // browser-only
-
+      const supabase = await getSupabaseBrowserClient();
       const { error } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password,
@@ -48,61 +71,49 @@ export default function LoginPage() {
         return;
       }
 
-      r.push("/dashboard");
+      router.push(nextTarget);
+      router.refresh();
     } catch (e: unknown) {
       setStatus(e instanceof Error ? e.message : "Login failed.");
     } finally {
       setBusy(false);
     }
-  };
+  }
 
   return (
-    <main style={{ display: "grid", gap: 12, maxWidth: 520 }}>
-      <h2 style={{ margin: 0 }}>Login</h2>
+    <AuthCard title="Login">
+      <div style={{ display: "grid", gap: 10 }}>
+        <AuthInput
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          autoComplete="email"
+          inputMode="email"
+        />
+        <AuthInput
+          placeholder="Password"
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          autoComplete="current-password"
+        />
 
-      <Card>
-        <div style={{ display: "grid", gap: 10 }}>
-          <input
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            style={inp}
-            autoComplete="email"
-          />
-          <input
-            placeholder="Password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            style={inp}
-            autoComplete="current-password"
-          />
+        <AuthButton
+          onClick={signIn}
+          disabled={busy || !email.trim() || !password}
+        >
+          {busy ? "Signing in..." : "Sign in"}
+        </AuthButton>
 
-          <button onClick={signIn} style={btn} disabled={busy}>
-            {busy ? "Signing in..." : "Sign in"}
-          </button>
+        <AuthStatus message={status} />
 
-          {status ? <div style={{ fontSize: 13, opacity: 0.85 }}>{status}</div> : null}
-
-          <div style={{ fontSize: 13, opacity: 0.75 }}>
-            No account? <Link href="/auth/signup">Create one</Link>
-          </div>
+        <div style={{ fontSize: 13, opacity: 0.75 }}>
+          No account?{" "}
+          <Link href={`/auth/signup?next=${encodeURIComponent(nextTarget)}`}>
+            Create one
+          </Link>
         </div>
-      </Card>
-    </main>
+      </div>
+    </AuthCard>
   );
 }
-
-const inp: React.CSSProperties = {
-  padding: 12,
-  borderRadius: 10,
-  border: "1px solid #ddd",
-  width: "100%",
-};
-
-const btn: React.CSSProperties = {
-  padding: 12,
-  borderRadius: 10,
-  border: "1px solid #ddd",
-  cursor: "pointer",
-};
